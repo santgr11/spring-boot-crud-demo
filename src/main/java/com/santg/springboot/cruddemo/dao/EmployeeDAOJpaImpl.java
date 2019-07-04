@@ -5,7 +5,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -38,12 +37,9 @@ public class EmployeeDAOJpaImpl implements EmployeeDAO {
 
 	@Override
 	public Employee findById(int id) {
-		
-		// get current hibernate session
-		Session currentSession = entityManager.unwrap(Session.class);
-		
+	
 		// get the employee
-		Employee employee = currentSession.get(Employee.class, id);
+		Employee employee = entityManager.find(Employee.class, id);
 		
 		// return the employee
 		return employee;
@@ -51,23 +47,18 @@ public class EmployeeDAOJpaImpl implements EmployeeDAO {
 
 	@Override
 	public void save(Employee employee) {
-		
-		// get current hibernate session
-		Session currentSession = entityManager.unwrap(Session.class);
-		
+
 		// save the employee
-		currentSession.saveOrUpdate(employee);
+		Employee tempEmployee = entityManager.merge(employee);
 		
+		employee.setId(tempEmployee.getId());
 	}
 
 	@Override
 	public void deleteById(int id) {
-		
-		// get current hibernate session
-		Session currentSession = entityManager.unwrap(Session.class);
 
 		// delete object with primary key
-		Query query = currentSession.createQuery(
+		Query query = entityManager.createQuery(
 				"delete from Employee where id=:employeeId");
 		
 		query.setParameter("employeeId", id);
